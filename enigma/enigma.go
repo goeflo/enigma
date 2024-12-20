@@ -88,7 +88,7 @@ func (e EnigmaImpl) Cipher(in string) (string, error) {
 
 		out = e.entryRotor.reverse(out)
 
-		out = e.plugboard.reverse(out)
+		out = e.plugboard.cipher(out)
 
 		crypt += string(alphabetIdxToRune(alphabet, out))
 	}

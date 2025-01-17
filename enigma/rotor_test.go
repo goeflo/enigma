@@ -9,7 +9,7 @@ import (
 
 func TestNotch(t *testing.T) {
 	r1 := RotorV(1, true)
-	r1.position = 24
+	r1.offset = 24
 
 	alphaIdx := runeToAlphabetIdx(alphabet, 'A')
 	cipherIdx := r1.cipher(alphaIdx)

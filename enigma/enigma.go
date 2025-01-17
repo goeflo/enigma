@@ -43,7 +43,7 @@ func EnigmaI(plugs []string, v bool) (Enigma, error) {
 func (e *EnigmaImpl) String() string {
 	return fmt.Sprintf("enigma: %v, entry rotor: %v, reflector: %v\nplugboard: %v\nrotor configuration: %v(%02d) %v(%02d) %v(%02d)\n",
 		e.version, e.entryRotor.name, e.reflector.name, e.plugboard.String(),
-		e.rotors[0].name, e.rotors[0].position, e.rotors[1].name, e.rotors[1].position, e.rotors[2].name, e.rotors[2].position)
+		e.rotors[0].name, e.rotors[0].offset, e.rotors[1].name, e.rotors[1].offset, e.rotors[2].name, e.rotors[2].offset)
 }
 
 // p is the position of the rotor in the enigma, for EnigmaI 1-3

@@ -9,7 +9,7 @@ import (
 const rotorSize = 26
 
 type rotor struct {
-	position    int
+	offset      int
 	name        string
 	alphabet    string
 	alphabetIdx []int
@@ -19,15 +19,15 @@ type rotor struct {
 }
 
 func (r rotor) String() string {
-	return fmt.Sprintf("%-5s pos: %02d", r.name, r.position)
+	return fmt.Sprintf("%-5s pos: %02d", r.name, r.offset)
 }
 
 func (r *rotor) step() {
-	r.position = int(math.Mod(float64(r.position+26), 26)) + 1
+	r.offset = int(math.Mod(float64(r.offset+26), 26)) + 1
 }
 
 func (r *rotor) cipher(input int) int {
-	c := input + r.position
+	c := input + r.offset
 
 	c = fixAlphaIdxRange(c)
 	c = r.alphabetIdx[c-1]
@@ -51,7 +51,7 @@ func (r *rotor) reverse(input int) int {
 	for i := 0; i < len(r.alphabetIdx); i++ {
 		if r.alphabetIdx[i] == input {
 
-			c = i + 1 - r.position
+			c = i + 1 - r.offset
 			c = fixAlphaIdxRange(c)
 			//fmt.Printf("index %v -pos %v alph %v\n", i+1, i+1-r.position, r.alphabetIdx[i-r.position])
 			//c := input - r.position
@@ -72,7 +72,7 @@ func (r *rotor) reverse(input int) int {
 
 func (r rotor) isNotch() bool {
 	for i := 0; i < len(r.notchesIdx); i++ {
-		if r.notchesIdx[i] == r.position {
+		if r.notchesIdx[i] == r.offset {
 			return true
 		}
 	}
@@ -97,14 +97,14 @@ func CreateRotor(name string, rotorAlphabet string, notches string, startPos int
 		name:        name,
 		alphabet:    rotorAlphabet,
 		notches:     notches,
-		position:    startPos - 1,
+		offset:      startPos - 1,
 		notchesIdx:  make([]int, len(notches)),
 		alphabetIdx: make([]int, len(rotorAlphabet)),
 		verbose:     verbose,
 	}
 
-	if r.position < 0 {
-		r.position = 0
+	if r.offset < 0 {
+		r.offset = 0
 	}
 
 	for i, runeValue := range rotorAlphabet {

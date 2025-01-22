@@ -5,12 +5,7 @@ import (
 	"strings"
 )
 
-type Plugboard interface {
-	cipher(in int) int
-	String() string
-}
-
-type PlugboardImpl struct {
+type Plugboard struct {
 	plugs     []string
 	translate map[int]int
 	verbose   bool
@@ -18,7 +13,7 @@ type PlugboardImpl struct {
 
 func NewPlugboard(p []string, v bool) (Plugboard, error) {
 
-	plugboard := PlugboardImpl{
+	plugboard := Plugboard{
 		plugs:     p,
 		verbose:   v,
 		translate: make(map[int]int),
@@ -29,15 +24,15 @@ func NewPlugboard(p []string, v bool) (Plugboard, error) {
 		plugboard.translate[runeToAlphabetIdx(alphabet, rune(plug[1]))] = runeToAlphabetIdx(alphabet, rune(plug[0]))
 	}
 
-	return &plugboard, nil
+	return plugboard, nil
 }
 
-func (p PlugboardImpl) String() string {
+func (p Plugboard) String() string {
 	return strings.Join(p.plugs, ", ")
 
 }
 
-func (p PlugboardImpl) cipher(in int) int {
+func (p Plugboard) forward(in int) int {
 
 	c, ok := p.translate[in]
 	if ok {
@@ -49,33 +44,10 @@ func (p PlugboardImpl) cipher(in int) int {
 		return c
 	}
 	return in
-	/*
-		for i := 0; i < len(p.in); i++ {
-			if in == p.in[i] {
-				if p.verbose {
-					log.Printf("plugboard: %02d(%v) -> %02d(%v)",
-						in, string(alphabetIdxToRune(alphabet, in)),
-						p.out[i], string(alphabetIdxToRune(alphabet, p.out[i])))
-				}
-				return p.out[i]
-			}
-		}
-		return in*/
+
 }
 
-/*
-func (p PlugboardImpl) reverse(in int) int {
-	for i := 0; i < len(p.out); i++ {
-		if in == p.out[i] {
-			if p.verbose {
-				log.Printf("plugboard: %02d(%v) -> %02d(%v)",
-					in, string(alphabetIdxToRune(alphabet, in)),
-					p.in[i], string(alphabetIdxToRune(alphabet, p.in[i])))
-			}
-
-			return p.in[i]
-		}
-	}
-	return in
+// backward is the same because in forward and backward mappings are already in the map
+func (p Plugboard) backward(in int) int {
+	return p.forward(in)
 }
-*/

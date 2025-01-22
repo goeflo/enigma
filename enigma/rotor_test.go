@@ -3,81 +3,140 @@ package enigma
 import (
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestNotch(t *testing.T) {
-	r1 := RotorV(1, true)
-	r1.offset = 24
+	r1 := RotorV(true)
+	r1.position = 24
 
 	alphaIdx := runeToAlphabetIdx(alphabet, 'A')
-	cipherIdx := r1.cipher(alphaIdx)
+	cipherIdx := r1.forward(alphaIdx)
 	r1.step()
-	assert.False(t, r1.isNotch())
+	if r1.isNotch() {
+		t.Errorf("there should be no notch")
+	}
 
-	cipherIdx = r1.cipher(cipherIdx)
+	cipherIdx = r1.forward(cipherIdx)
 	r1.step()
-	assert.True(t, r1.isNotch())
+	if !r1.isNotch() {
+		t.Errorf("there should be a notch")
+	}
 
-	_ = r1.cipher(cipherIdx)
+	_ = r1.forward(cipherIdx)
 	r1.step()
-	assert.False(t, r1.isNotch())
+	if r1.isNotch() {
+		t.Errorf("there should be no notch")
+	}
 
 }
 
 func TestRotor(t *testing.T) {
 
-	ew := RotorETW(1, true)
-	r3 := RotorIII(1, true)
-	r2 := RotorII(10, true)
-	r1 := RotorI(1, true)
-	r := RotorUKWB(1, true)
+	ew := RotorETW(true)
+	r3 := RotorIII(true)
+	r2 := RotorII(true)
+	r1 := RotorI(true)
+	r := RotorUKWB(true)
+
+	r3.position = 0
+	r2.position = 0
+	r1.position = 0
 
 	// crypt
 	alphaIdx := runeToAlphabetIdx(alphabet, 'G')
 
-	cipherIdx := ew.cipher(alphaIdx)
+	cipherIdx := ew.forward(alphaIdx)
 
-	cipherIdx = r3.cipher(cipherIdx) // G -> C
-	cipherIdx = r2.cipher(cipherIdx) // C -> D
-	cipherIdx = r1.cipher(cipherIdx) // D -> F
+	cipherIdx = r3.forward(cipherIdx) // G -> C
+	cipherIdx = r2.forward(cipherIdx) // C -> D
+	cipherIdx = r1.forward(cipherIdx) // D -> F
 
-	cipherIdx = r.cipher(cipherIdx) // reflect F -> S
+	cipherIdx = r.forward(cipherIdx) // reflect F -> S
 
-	cipherIdx = r1.reverse(cipherIdx) // S -> S
-	cipherIdx = r2.reverse(cipherIdx) // S -> E
-	cipherIdx = r3.reverse(cipherIdx) // E -> P
+	cipherIdx = r1.backward(cipherIdx) // S -> S
+	cipherIdx = r2.backward(cipherIdx) // S -> E
+	cipherIdx = r3.backward(cipherIdx) // E -> P
 
-	cipherIdx = ew.reverse(cipherIdx)
+	cipherIdx = ew.backward(cipherIdx)
 
 	fmt.Printf("result %v\n", cipherIdx)
 	//assert.Equal(t, 16, cipherIdx)
 
 	// decrypt
-	cipherIdx = ew.cipher(cipherIdx)
-	cipherIdx = r3.cipher(cipherIdx)
-	cipherIdx = r2.cipher(cipherIdx)
-	cipherIdx = r1.cipher(cipherIdx)
+	cipherIdx = ew.forward(cipherIdx)
+	cipherIdx = r3.forward(cipherIdx)
+	cipherIdx = r2.forward(cipherIdx)
+	cipherIdx = r1.forward(cipherIdx)
 
-	cipherIdx = r.cipher(cipherIdx)
+	cipherIdx = r.forward(cipherIdx)
 
-	cipherIdx = r1.reverse(cipherIdx)
-	cipherIdx = r2.reverse(cipherIdx)
-	cipherIdx = r3.reverse(cipherIdx)
-	cipherIdx = ew.reverse(cipherIdx)
+	cipherIdx = r1.backward(cipherIdx)
+	cipherIdx = r2.backward(cipherIdx)
+	cipherIdx = r3.backward(cipherIdx)
+	cipherIdx = ew.backward(cipherIdx)
 
 	fmt.Printf("result %v\n", cipherIdx)
-	assert.Equal(t, alphaIdx, cipherIdx)
+	if alphaIdx != cipherIdx {
+		t.Errorf("input char %v does not match result char %v", alphaIdx, cipherIdx)
+	}
 
 }
 
 func TestReverse(t *testing.T) {
-	r := RotorIII(5, true)
+	r := RotorIII(true)
+	r.position = 4
 	alphaIdx := runeToAlphabetIdx(alphabet, 'B')
-	cipherIdx := r.cipher(alphaIdx)
-	decrypt := r.reverse(cipherIdx)
+	cipherIdx := r.forward(alphaIdx)
+	decrypt := r.backward(cipherIdx)
 
-	assert.Equal(t, runeToAlphabetIdx(alphabet, 'B'), decrypt)
+	if runeToAlphabetIdx(alphabet, 'B') != decrypt {
+		t.Errorf("start idx %v does not match result idx %v", runeToAlphabetIdx(alphabet, 'B'), decrypt)
+	}
 
 }
+
+func TestWithRing(t *testing.T) {
+	r := RotorIII(true)
+	r.position = 4
+	r.ringPosition = 20
+
+	alphaIdx := runeToAlphabetIdx(alphabet, 'B')
+	cipherIdx := r.forward(alphaIdx)
+	decrypt := r.backward(cipherIdx)
+
+	if runeToAlphabetIdx(alphabet, 'B') != decrypt {
+		t.Errorf("start idx %v does not match result idx %v", runeToAlphabetIdx(alphabet, 'B'), decrypt)
+	}
+
+	alphaIdx = runeToAlphabetIdx(alphabet, 'Q')
+	cipherIdx = r.forward(alphaIdx)
+	decrypt = r.backward(cipherIdx)
+
+	if runeToAlphabetIdx(alphabet, 'Q') != decrypt {
+		t.Errorf("start idx %v does not match result idx %v", runeToAlphabetIdx(alphabet, 'Q'), decrypt)
+	}
+}
+
+func TestNotched(t *testing.T) {
+
+	input := runeToAlphabetIdx(alphabet, 'Q')
+
+	r := RotorII(true)
+	r.forward(input)
+
+	r.step()
+	r.forward(input)
+	r.step()
+	r.forward(input)
+	r.step()
+	r.forward(input)
+
+}
+
+/*
+{2, 'A', 'C', false, false, 17, 24}, // Q -> X
+		{1, 'C', 'D', false, false, 21, 19}, // U -> S
+		{1, 'D', 'E', false, true, 5, 20},   // E -> T
+		{1, 'E', 'F', true, false, 5, 23},   // E -> W
+		{1, 'F', 'G', false, false, 14, 8},  // N -> H
+*/

@@ -12,9 +12,9 @@ func TestPlugboard(t *testing.T) {
 	assert.Nil(t, err)
 
 	idx := runeToAlphabetIdx(alphabet, 'A')
-	crypt := p.cipher(idx)
+	crypt := p.forward(idx)
 	fmt.Printf("%v\n", crypt)
-	decrypt := p.cipher(crypt)
+	decrypt := p.forward(crypt)
 	assert.Equal(t, idx, decrypt)
 
 }

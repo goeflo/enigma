@@ -6,8 +6,6 @@ import (
 	"math"
 )
 
-const rotorSize = 26
-
 type Rotor struct {
 	position     int
 	ringPosition int
@@ -36,10 +34,9 @@ func (r *Rotor) step() {
 }
 
 func (r *Rotor) forward(input int) int {
-	c := input - r.ringPosition + r.position
 
-	c = fixAlphaIdxRange(c)
-	alphaIdx := r.alphabetIdx[c-1]
+	c := fixRange(input - r.ringPosition + r.position)
+	alphaIdx := r.alphabetIdx[c]
 
 	if r.verbose {
 		log.Printf("forward %s, in: %02d(%s) out: %02d(%s)\n",
@@ -51,20 +48,15 @@ func (r *Rotor) forward(input int) int {
 }
 
 func (r *Rotor) backward(input int) int {
-	alphaIdx := input - r.ringPosition + r.position
-	alphaIdx = fixAlphaIdxRange(alphaIdx)
+	alphaIdx := fixRange(input - r.ringPosition + r.position)
 
 	for i := 0; i < len(r.alphabetIdx); i++ {
 		if r.alphabetIdx[i] == input {
-
-			alphaIdx = i + 1 //- r.position
-			alphaIdx = fixAlphaIdxRange(alphaIdx)
+			alphaIdx = fixRange(i + r.ringPosition - r.position)
 			break
 		}
 	}
 
-	alphaIdx = alphaIdx + r.ringPosition - r.position
-	alphaIdx = fixAlphaIdxRange(alphaIdx)
 	if r.verbose {
 		log.Printf("reverse %s, in: %02d(%s) out: %02d(%s)\n",
 			r.String(),
@@ -84,13 +76,8 @@ func (r Rotor) isNotch() bool {
 	return false
 }
 
-func fixAlphaIdxRange(idx int) int {
-	if idx <= 0 {
-		return idx + rotorSize
-	} else if idx > rotorSize {
-		return idx - rotorSize
-	}
-	return idx
+func fixRange(i int) int {
+	return ((i + 26) % 26)
 }
 
 //

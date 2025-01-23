@@ -110,18 +110,20 @@ func (e EnigmaImpl) Cipher(in string) (string, error) {
 	in = strings.ToUpper(in)
 	crypt := ""
 	for _, runeVal := range in {
-		out := e.plugboard.forward(runeToAlphabetIdx(alphabet, runeVal))
 
+		for i := 1; i < len(e.rotors); i++ {
+			if e.rotors[i-1].isNotch() {
+				e.rotors[i].step()
+			}
+		}
+		e.rotors[0].step()
+
+		//		out := e.entryRotor.forward(runeToAlphabetIdx(alphabet, runeVal))
+		//		out = e.rotors[0].forward(out)
+		out := e.plugboard.forward(runeToAlphabetIdx(alphabet, runeVal))
 		out = e.entryRotor.forward(out)
 
 		for i := 0; i < len(e.rotors); i++ {
-			if i == 0 {
-				e.rotors[i].step()
-			} else {
-				if e.rotors[i-1].isNotch() {
-					e.rotors[i].step()
-				}
-			}
 			out = e.rotors[i].forward(out)
 		}
 
@@ -132,7 +134,6 @@ func (e EnigmaImpl) Cipher(in string) (string, error) {
 		}
 
 		out = e.entryRotor.backward(out)
-
 		out = e.plugboard.forward(out)
 
 		crypt += string(alphabetIdxToRune(alphabet, out))
@@ -142,13 +143,13 @@ func (e EnigmaImpl) Cipher(in string) (string, error) {
 }
 
 func alphabetIdxToRune(a string, i int) rune {
-	return rune(a[i-1])
+	return rune(a[i])
 }
 
 func runeToAlphabetIdx(a string, r rune) int {
 	for i, runeValue := range a {
 		if r == runeValue {
-			return i + 1
+			return i
 		}
 	}
 	return -1

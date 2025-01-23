@@ -48,6 +48,6 @@ func (p Plugboard) forward(in int) int {
 }
 
 // backward is the same because in forward and backward mappings are already in the map
-func (p Plugboard) backward(in int) int {
-	return p.forward(in)
-}
+//func (p Plugboard) backward(in int) int {
+//	return p.forward(in)
+//}

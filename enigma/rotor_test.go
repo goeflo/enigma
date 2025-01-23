@@ -11,22 +11,38 @@ func TestNotch(t *testing.T) {
 
 	alphaIdx := runeToAlphabetIdx(alphabet, 'A')
 	cipherIdx := r1.forward(alphaIdx)
-	r1.step()
 	if r1.isNotch() {
 		t.Errorf("there should be no notch")
 	}
 
-	cipherIdx = r1.forward(cipherIdx)
 	r1.step()
+	cipherIdx = r1.forward(cipherIdx)
 	if !r1.isNotch() {
 		t.Errorf("there should be a notch")
 	}
 
-	_ = r1.forward(cipherIdx)
 	r1.step()
+	cipherIdx = r1.forward(cipherIdx)
 	if r1.isNotch() {
 		t.Errorf("there should be no notch")
 	}
+
+	r1.step()
+	_ = r1.forward(cipherIdx)
+	if r1.isNotch() {
+		t.Errorf("there should be no notch")
+	}
+
+}
+
+func TestFixRange(t *testing.T) {
+
+	for i := -5; i < 30; i++ {
+		fmt.Printf(" %v %v\n", i, fixRange(i))
+	}
+}
+
+func TestRotor2(t *testing.T) {
 
 }
 
@@ -38,9 +54,9 @@ func TestRotor(t *testing.T) {
 	r1 := RotorI(true)
 	r := RotorUKWB(true)
 
-	r3.position = 0
-	r2.position = 0
-	r1.position = 0
+	r3.position = 10
+	r2.position = 5
+	r1.position = 17
 
 	// crypt
 	alphaIdx := runeToAlphabetIdx(alphabet, 'G')
@@ -119,17 +135,27 @@ func TestWithRing(t *testing.T) {
 
 func TestNotched(t *testing.T) {
 
-	input := runeToAlphabetIdx(alphabet, 'Q')
-
 	r := RotorII(true)
-	r.forward(input)
+	r.step()
+	r.step()
+	if r.isNotch() {
+		t.Errorf("there should be no notch")
+	}
 
 	r.step()
-	r.forward(input)
+	if r.isNotch() {
+		t.Errorf("there should be no notch")
+	}
+
 	r.step()
-	r.forward(input)
+	if !r.isNotch() {
+		t.Errorf("there should be a notch")
+	}
+
 	r.step()
-	r.forward(input)
+	if r.isNotch() {
+		t.Errorf("there should be no notch")
+	}
 
 }
 
